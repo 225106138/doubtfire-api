@@ -62,6 +62,7 @@ pipeline {
                     docker run --rm --network ${TEST_NETWORK} \
                         -e RAILS_ENV=test \
                         -e CI=true \
+                        -e TERM=xterm \
                         -e DF_TEST_DB_ADAPTER=mysql2 \
                         -e DF_TEST_DB_HOST=${DB_CONTAINER} \
                         -e DF_TEST_DB_DATABASE=doubtfire-test \
@@ -83,7 +84,7 @@ pipeline {
                 }
             }
         }
-        
+
         stage('Code Quality') {
             steps {
                 withCredentials([string(credentialsId: 'SONAR_TOKEN', variable: 'SONAR_TOKEN')]) {
