@@ -1,6 +1,10 @@
 pipeline {
     agent any
 
+    parameters {
+        string(name: 'TEST_PATH', defaultValue: '', description: 'Limit the Test stage to a path (e.g. test/models) for fast iteration. Empty = full suite.')
+    }
+    
     environment {
         IMAGE_NAME = 'doubtfire-api'
         IMAGE_TAG  = "${env.BUILD_NUMBER}"
@@ -71,7 +75,7 @@ pipeline {
                         -e DF_REDIS_CACHE_URL=redis://${REDIS_CONTAINER}:6379/0 \
                         -e DF_REDIS_SIDEKIQ_URL=redis://${REDIS_CONTAINER}:6379/1 \
                         ${IMAGE_NAME}:${IMAGE_TAG} \
-                        bash -c "bundle exec rails db:environment:set RAILS_ENV=test && RAILS_ENV=test bundle exec rake db:populate && bundle exec rails test"
+                        bash -c "bundle exec rails db:environment:set RAILS_ENV=test && RAILS_ENV=test bundle exec rake db:populate && bundle exec rails test ${TEST_PATH}"
                 '''
             }
             post {
