@@ -134,9 +134,9 @@ pipeline {
                     docker compose -p df-staging -f docker-compose.staging.yml down -v --remove-orphans || true
                     docker compose -p df-staging -f docker-compose.staging.yml up -d
 
-                    echo "Waiting for the staging API to respond on port 3001..."
+                    echo "Waiting for the staging API to respond (checked inside the container)..."
                     for i in $(seq 1 60); do
-                        if curl -fsS -H "Host: localhost" http://host.docker.internal:3001/api/docs/ >/dev/null 2>&1; then                            
+                        if docker exec df-staging-api curl -fsS http://localhost:3000/api/docs/ >/dev/null 2>&1; then
                             echo "Staging API is live on http://localhost:3001"
                             break
                         fi
