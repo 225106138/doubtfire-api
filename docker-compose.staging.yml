@@ -1,0 +1,45 @@
+services:
+  staging-db:
+    image: mariadb
+    container_name: df-staging-db
+    environment:
+      MYSQL_ROOT_PASSWORD: db-root-password
+      MYSQL_DATABASE: doubtfire-staging
+      MYSQL_USER: dfire
+      MYSQL_PASSWORD: pwd
+    volumes:
+      - staging-db-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  staging-redis:
+    image: redis:7
+    container_name: df-staging-redis
+
+  staging-api:
+    image: doubtfire-api:latest
+    container_name: df-staging-api
+    command: ["bash", "-c", "rm -f tmp/pids/server.pid && bundle exec rails db:environment:set RAILS_ENV=development && bundle exec rake db:populate && bundle exec rails s -b 0.0.0.0"]
+    ports:
+      - "3001:3000"
+    depends_on:
+      staging-db:
+        condition: service_healthy
+      staging-redis:
+        condition: service_started
+    environment:
+      RAILS_ENV: development
+      DF_INSTITUTION_HOST: http://localhost:3001
+      DF_DEV_DB_ADAPTER: mysql2
+      DF_DEV_DB_HOST: staging-db
+      DF_DEV_DB_DATABASE: doubtfire-staging
+      DF_DEV_DB_USERNAME: dfire
+      DF_DEV_DB_PASSWORD: pwd
+      DF_REDIS_CACHE_URL: redis://staging-redis:6379/0
+      DF_REDIS_SIDEKIQ_URL: redis://staging-redis:6379/1
+
+volumes:
+  staging-db-data:

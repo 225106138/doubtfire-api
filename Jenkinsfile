@@ -121,6 +121,30 @@ pipeline {
                 '''
             }
         }
+
+        stage('Deploy') {
+            steps {
+                echo 'Deploying to local staging with docker compose (port 3001)...'
+                sh '''
+                    docker compose -p df-staging -f docker-compose.staging.yml down --remove-orphans || true
+                    docker compose -p df-staging -f docker-compose.staging.yml up -d
+
+                    echo "Waiting for the staging API to respond on port 3001..."
+                    for i in $(seq 1 60); do
+                        if curl -fsS http://host.docker.internal:3001/api/docs/ >/dev/null 2>&1; then
+                            echo "Staging API is live on http://localhost:3001"
+                            break
+                        fi
+                        if [ "$i" = "60" ]; then
+                            echo "Staging API did not come up in time. Recent logs:"
+                            docker compose -p df-staging -f docker-compose.staging.yml logs --tail=60 staging-api
+                            exit 1
+                        fi
+                        sleep 5
+                    done
+                '''
+            }
+        }
     }
 
     post {
