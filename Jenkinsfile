@@ -1,6 +1,11 @@
 pipeline {
     agent any
 
+    environment {
+        IMAGE_NAME = 'doubtfire-api'
+        IMAGE_TAG  = "${env.BUILD_NUMBER}"
+    }
+
     options {
         timestamps()
     }
@@ -11,10 +16,10 @@ pipeline {
                 echo "Checked out commit ${env.GIT_COMMIT}"
             }
         }
-        stage('Verify tooling') {
+        stage('Build') {
             steps {
-                sh 'docker version'
-                sh 'docker compose version'
+                echo "Building ${IMAGE_NAME}:${IMAGE_TAG}"
+                sh 'docker build -t ${IMAGE_NAME}:${IMAGE_TAG} -t ${IMAGE_NAME}:latest .'
             }
         }
     }
