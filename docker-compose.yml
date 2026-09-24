@@ -1,4 +1,4 @@
-version: '3'
+# version: '3'
 services:
   df-api:
     container_name: df-api
@@ -11,6 +11,7 @@ services:
       - ../data/student-work:/student-work
     depends_on:
       - dev-db
+      - redis
     environment:
       RAILS_ENV: 'development'
 
@@ -55,6 +56,10 @@ services:
       DF_PRODUCTION_DB_USERNAME: dfire
       DF_PRODUCTION_DB_PASSWORD: pwd
 
+      # Redis settings
+      DF_REDIS_CACHE_URL: redis://redis:6379/0
+      DF_REDIS_SIDEKIQ_URL: redis://redis:6379/1
+
       # Overseer
       OVERSEER_ENABLED: 0
       # RABBITMQ_HOSTNAME: doubtfire-mq
@@ -71,3 +76,7 @@ services:
       MYSQL_PASSWORD: pwd
     volumes:
       - ../data/database:/var/lib/mysql
+  
+  redis:
+    container_name: doubtfire-redis
+    image: redis:7

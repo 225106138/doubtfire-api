@@ -3,6 +3,11 @@ FROM ruby:3.1-bullseye
 # DEBIAN_FRONTEND=noninteractive is required to install tzdata in non interactive way
 ENV DEBIAN_FRONTEND noninteractive
 
+# Debian 11 "bullseye" reached end-of-life on 31 Aug 2026; its packages moved to
+# archive.debian.org. Point apt there and skip the Valid-Until expiry check.
+RUN printf 'deb http://archive.debian.org/debian bullseye main\n' > /etc/apt/sources.list \
+  && echo 'Acquire::Check-Valid-Until "false";' > /etc/apt/apt.conf.d/99no-check-valid-until
+
 RUN apt-get update \
   && apt-get install -y apt-transport-https ca-certificates curl gnupg2 software-properties-common \
   && curl -fsSL https://download.docker.com/linux/debian/gpg | apt-key add - \

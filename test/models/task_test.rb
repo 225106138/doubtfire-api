@@ -318,6 +318,7 @@ class TaskDefinitionTest < ActiveSupport::TestCase
   end
 
   def test_ipynb_to_pdf
+    skip 'Excluded from CI: requires Jupyter nbconvert toolchain, out of scope for the pipeline' if ENV['CI']
     unit = FactoryBot.create(:unit, student_count: 1, task_count: 0)
     td = TaskDefinition.new({
         unit_id: unit.id,
@@ -411,6 +412,7 @@ class TaskDefinitionTest < ActiveSupport::TestCase
   end
 
   def test_code_submission_with_long_lines
+    skip 'Excluded from CI: requires Jupyter nbconvert toolchain, out of scope for the pipeline' if ENV['CI']
     unit = FactoryBot.create(:unit, student_count: 1, task_count: 0)
     td = TaskDefinition.new({
         unit_id: unit.id,
