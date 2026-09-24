@@ -131,7 +131,7 @@ pipeline {
 
                     echo "Waiting for the staging API to respond on port 3001..."
                     for i in $(seq 1 60); do
-                        if curl -fsS http://host.docker.internal:3001/api/docs/ >/dev/null 2>&1; then
+                        if curl -fsS -H "Host: localhost" http://host.docker.internal:3001/api/docs/ >/dev/null 2>&1; then                            
                             echo "Staging API is live on http://localhost:3001"
                             break
                         fi
