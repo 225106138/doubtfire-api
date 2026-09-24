@@ -145,6 +145,41 @@ pipeline {
                 '''
             }
         }
+
+        stage('Release') {
+            environment {
+                REGISTRY        = 'localhost:5000'
+                RELEASE_VERSION = "1.0.${env.BUILD_NUMBER}"
+            }
+            steps {
+                echo "Tagging and pushing release ${RELEASE_VERSION} to ${REGISTRY}..."
+                sh '''
+                    docker tag ${IMAGE_NAME}:${IMAGE_TAG} ${REGISTRY}/${IMAGE_NAME}:${RELEASE_VERSION}
+                    docker tag ${IMAGE_NAME}:${IMAGE_TAG} ${REGISTRY}/${IMAGE_NAME}:stable
+                    docker push ${REGISTRY}/${IMAGE_NAME}:${RELEASE_VERSION}
+                    docker push ${REGISTRY}/${IMAGE_NAME}:stable
+                '''
+                echo 'Promoting the release to local production (port 3002)...'
+                sh '''
+                    docker compose -p df-prod -f docker-compose.prod.yml down --remove-orphans || true
+                    RELEASE_VERSION=${RELEASE_VERSION} docker compose -p df-prod -f docker-compose.prod.yml up -d
+
+                    echo "Waiting for the production API to respond on port 3002..."
+                    for i in $(seq 1 60); do
+                        if curl -fsS http://host.docker.internal:3002/api/docs/ >/dev/null 2>&1; then
+                            echo "Production API is live on http://localhost:3002 (release ${RELEASE_VERSION})"
+                            break
+                        fi
+                        if [ "$i" = "60" ]; then
+                            echo "Production API did not come up in time. Recent logs:"
+                            docker compose -p df-prod -f docker-compose.prod.yml logs --tail=60 prod-api
+                            exit 1
+                        fi
+                        sleep 5
+                    done
+                '''
+            }
+        }
     }
 
     post {
