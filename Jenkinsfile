@@ -108,9 +108,10 @@ pipeline {
                     docker run --rm \
                         -v //var/run/docker.sock:/var/run/docker.sock \
                         aquasec/trivy:latest image \
-                        --exit-code 0 --no-progress \
-                        --severity HIGH,CRITICAL \
-                        ${IMAGE_NAME}:${IMAGE_TAG}
+                            --scanners vuln \
+                            --exit-code 0 --no-progress \
+                            --severity HIGH,CRITICAL \
+                            ${IMAGE_NAME}:${IMAGE_TAG}
                 '''
                 echo 'Running Brakeman static analysis (Rails SAST)...'
                 sh '''
