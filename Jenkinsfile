@@ -98,6 +98,27 @@ pipeline {
                 }
             }
         }
+
+        stage('Security') {
+            steps {
+                echo 'Scanning the built image for OS/library CVEs with Trivy...'
+                sh '''
+                    docker run --rm \
+                        -v //var/run/docker.sock:/var/run/docker.sock \
+                        aquasec/trivy:latest image \
+                        --exit-code 0 --no-progress \
+                        --severity HIGH,CRITICAL \
+                        ${IMAGE_NAME}:${IMAGE_TAG}
+                '''
+                echo 'Running Brakeman static analysis (Rails SAST)...'
+                sh '''
+                    docker run --rm --volumes-from jenkins \
+                        presidentbeef/brakeman \
+                        --no-exit-on-warn --no-exit-on-error \
+                        -p ${WORKSPACE}
+                '''
+            }
+        }
     }
 
     post {
