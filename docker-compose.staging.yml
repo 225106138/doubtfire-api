@@ -38,6 +38,16 @@ services:
       DF_DEV_DB_DATABASE: doubtfire-staging
       DF_DEV_DB_USERNAME: dfire
       DF_DEV_DB_PASSWORD: pwd
+      DF_TEST_DB_ADAPTER: mysql2
+      DF_TEST_DB_HOST: staging-db
+      DF_TEST_DB_DATABASE: doubtfire-staging
+      DF_TEST_DB_USERNAME: dfire
+      DF_TEST_DB_PASSWORD: pwd
+      DF_PRODUCTION_DB_ADAPTER: mysql2
+      DF_PRODUCTION_DB_HOST: staging-db
+      DF_PRODUCTION_DB_DATABASE: doubtfire-staging
+      DF_PRODUCTION_DB_USERNAME: dfire
+      DF_PRODUCTION_DB_PASSWORD: pwd
       DF_REDIS_CACHE_URL: redis://staging-redis:6379/0
       DF_REDIS_SIDEKIQ_URL: redis://staging-redis:6379/1
 
