@@ -191,16 +191,16 @@ pipeline {
                 echo 'Verifying Prometheus is observing the production release (probe_success)...'
                 sh '''
                     for i in $(seq 1 20); do
-                        RESULT=$(curl -fsS "http://host.docker.internal:9090/api/v1/query?query=probe_success" 2>/dev/null || echo "")
-                        if echo "$RESULT" | grep -q ',"1"]'; then
+                        RESULT=$(docker exec df-prometheus promtool query instant http://localhost:9090 probe_success 2>/dev/null || echo "")
+                        if echo "$RESULT" | grep -q "=> 1 @"; then
                             echo "Prometheus reports the production probe UP - monitoring is active."
                             exit 0
                         fi
                         echo "Prod probe not yet UP in Prometheus (attempt $i)..."
                         sleep 6
                     done
-                    echo "Prometheus did not report the prod probe UP in time."
-                    curl -fsS "http://host.docker.internal:9090/api/v1/query?query=probe_success" || true
+                    echo "Prometheus did not report the prod probe UP in time. Last result:"
+                    docker exec df-prometheus promtool query instant http://localhost:9090 probe_success || true
                     exit 1
                 '''
             }
