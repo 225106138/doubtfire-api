@@ -83,6 +83,20 @@ pipeline {
                 }
             }
         }
+        
+        stage('Code Quality') {
+            steps {
+                withCredentials([string(credentialsId: 'SONAR_TOKEN', variable: 'SONAR_TOKEN')]) {
+                    sh '''
+                        docker run --rm --volumes-from jenkins \
+                            -e SONAR_TOKEN=${SONAR_TOKEN} \
+                            sonarsource/sonar-scanner-cli \
+                            -Dsonar.projectBaseDir=${WORKSPACE} \
+                            -Dsonar.host.url=https://sonarcloud.io
+                    '''
+                }
+            }
+        }
     }
 
     post {
