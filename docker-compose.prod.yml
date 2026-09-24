@@ -22,7 +22,10 @@ services:
   prod-api:
     image: localhost:5000/doubtfire-api:${RELEASE_VERSION:-stable}
     container_name: df-prod-api
-    command: ["bash", "-c", "rm -f tmp/pids/server.pid && bundle exec rails db:environment:set RAILS_ENV=development && bundle exec rake db:populate && bundle exec rails s -b 0.0.0.0"]
+    command:
+      - "bash"
+      - "-c"
+      - "rm -f tmp/pids/server.pid && bundle exec rake db:create && bundle exec rails db:environment:set RAILS_ENV=development && bundle exec rake db:populate && bundle exec rails s -b 0.0.0.0"
     ports:
       - "3002:3000"
     depends_on:
@@ -38,6 +41,16 @@ services:
       DF_DEV_DB_DATABASE: doubtfire-prod
       DF_DEV_DB_USERNAME: dfire
       DF_DEV_DB_PASSWORD: pwd
+      DF_TEST_DB_ADAPTER: mysql2
+      DF_TEST_DB_HOST: prod-db
+      DF_TEST_DB_DATABASE: doubtfire-prod
+      DF_TEST_DB_USERNAME: dfire
+      DF_TEST_DB_PASSWORD: pwd
+      DF_PRODUCTION_DB_ADAPTER: mysql2
+      DF_PRODUCTION_DB_HOST: prod-db
+      DF_PRODUCTION_DB_DATABASE: doubtfire-prod
+      DF_PRODUCTION_DB_USERNAME: dfire
+      DF_PRODUCTION_DB_PASSWORD: pwd
       DF_REDIS_CACHE_URL: redis://prod-redis:6379/0
       DF_REDIS_SIDEKIQ_URL: redis://prod-redis:6379/1
 
